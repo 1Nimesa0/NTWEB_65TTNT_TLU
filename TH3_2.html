@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Đăng Ký</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .error { color: red; font-size: 0.9em; }
+    .success-message { display: none; color: green; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Form Đăng Ký</h2>
+    <form id="registerForm">
+      <div>
+        <label for="fullname">Họ tên:</label><br>
+        <input type="text" id="fullname" name="fullname">
+        <span class="error" id="errorFullname"></span>
+      </div>
+      <div>
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email">
+        <span class="error" id="errorEmail"></span>
+      </div>
+      <div>
+        <label for="password">Mật khẩu:</label><br>
+        <input type="password" id="password" name="password">
+        <span class="error" id="errorPassword"></span>
+      </div>
+      <button type="submit">Đăng ký</button>
+    </form>
+
+    <div class="success-message" id="successMessage">Đăng ký thành công!</div>
+  </div>
+
+  <script>
+    $(document).ready(function () {
+      console.log("jQuery is ready!");
+
+      $('#registerForm').on('submit', function (e) {
+        e.preventDefault();
+
+        // Xóa lỗi cũ
+        $('.error').text('');
+
+        let fullname = $('#fullname').val().trim();
+        let email = $('#email').val().trim();
+        let password = $('#password').val().trim();
+
+        let hasError = false;
+
+        if (fullname === '') {
+          $('#errorFullname').text('Họ tên không được để trống.');
+          hasError = true;
+        }
+
+        if (email === '' || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+          $('#errorEmail').text('Email không hợp lệ.');
+          hasError = true;
+        }
+
+        if (password.length < 6) {
+          $('#errorPassword').text('Mật khẩu phải từ 6 ký tự trở lên.');
+          hasError = true;
+        }
+
+        if (!hasError) {
+          $.ajax({
+            url: 'https://jsonplaceholder.typicode.com/posts',
+            type: 'POST',
+            data: {
+              fullname: fullname,
+              email: email,
+              password: password
+            },
+            success: function (response) {
+              $('#registerForm').slideUp();
+              $('#successMessage').text('Đăng ký thành công!').fadeIn();
+              console.log('Response:', response);
+            },
+            error: function () {
+              alert('Server bận, vui lòng thử lại sau.');
+            }
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
