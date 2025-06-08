@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý Học sinh</title>
+  <style>
+    /* căn giữa vùng chứa */
+    .container {
+      width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* khoảng cách giữa các ô nhập */
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    /* ẩn/hiện lỗi */
+    .error-message {
+      color: red;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    /* style khung thông báo thành công */
+    .notification {
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .notification.success {
+      background-color: #d4edda;
+    }
+
+    /* style cơ bản cho bảng */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+
+    button {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Form nhập liệu học sinh -->
+    <form id="studentForm">
+      <!-- Ô nhập Họ tên -->
+      <div class="form-group">
+        <label for="fullName">Họ tên:</label>
+        <input type="text" id="fullName" />
+        <div id="errorFullName" class="error-message"><!-- div hiển thị lỗi Họ tên --></div>
+      </div>
+
+      <!-- Ô nhập Lớp -->
+      <div class="form-group">
+        <label for="className">Lớp:</label>
+        <input type="text" id="className" />
+        <div id="errorClassName" class="error-message"><!-- div hiển thị lỗi Lớp --></div>
+      </div>
+
+      <!-- Các nút thao tác -->
+      <button type="button" id="btnAdd">Thêm Học sinh</button> <!-- Chỉ hiện ở chế độ Thêm -->
+      <button type="button" id="btnUpdate" style="display: none;">Cập nhật</button> <!-- Chỉ hiện khi Sửa -->
+      <button type="button" id="btnCancel" style="display: none;">Hủy</button> <!-- Chỉ hiện khi Sửa -->
+    </form>
+
+    <!-- Khu vực hiển thị thông báo -->
+    <div id="notification" class="notification success"><!-- Hiển thị thông báo thành công --></div>
+
+    <!-- Bảng tĩnh danh sách học sinh -->
+    <table id="studentTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Họ tên</th>
+          <th>Lớp</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Nguyễn Văn A</td>
+          <td>10A1</td>
+          <td>
+            <button class="btn-edit" data-id="1">Sửa</button>
+            <button class="btn-delete">Xóa</button>
+          </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Trần Thị B</td>
+          <td>11B2</td>
+          <td>
+            <button class="btn-edit" data-id="2">Sửa</button>
+            <button class="btn-delete">Xóa</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // ======= Khai báo biến và lấy tham chiếu DOM =======
+    const fullName = document.getElementById("fullName"); // Lấy ô input Họ tên
+    const className = document.getElementById("className"); // Lấy ô input Lớp
+    const errorFullName = document.getElementById("errorFullName"); // div lỗi Họ tên
+    const errorClassName = document.getElementById("errorClassName"); // div lỗi Lớp
+    const notification = document.getElementById("notification"); // div thông báo
+
+    const btnAdd = document.getElementById("btnAdd");
+    const btnUpdate = document.getElementById("btnUpdate");
+    const btnCancel = document.getElementById("btnCancel");
+
+    let editId = null; // ID đang sửa
+
+    // ======= Hàm validateForm() - Kiểm tra input =======
+    function validateForm() {
+      let isValid = true;
+
+      if (fullName.value.trim() === "") {
+        errorFullName.textContent = "Họ tên không được để trống";
+        errorFullName.style.display = "block";
+        isValid = false;
+      } else if (fullName.value.length > 50) {
+        errorFullName.textContent = "Họ tên không quá 50 ký tự";
+        errorFullName.style.display = "block";
+        isValid = false;
+      } else {
+        errorFullName.style.display = "none";
+      }
+
+      if (className.value.trim() === "") {
+        errorClassName.textContent = "Lớp không được để trống";
+        errorClassName.style.display = "block";
+        isValid = false;
+      } else {
+        errorClassName.style.display = "none";
+      }
+
+      return isValid;
+    }
+
+    // ======= Hàm showNotification(message) =======
+    function showNotification(message) {
+      notification.textContent = message;
+      notification.style.display = "block";
+      setTimeout(() => {
+        notification.style.display = "none";
+      }, 2000);
+    }
+
+    // ======= Xử lý sự kiện Thêm =======
+    btnAdd.onclick = function () {
+      if (validateForm()) {
+        showNotification("Thêm Học sinh thành công!");
+        fullName.value = "";
+        className.value = "";
+      }
+    };
+
+    // ======= Xử lý sự kiện Sửa =======
+    document.querySelectorAll(".btn-edit").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        editId = btn.getAttribute("data-id"); // Giả lập ID đang sửa
+
+        fullName.value = "Giá trị đang sửa"; // Bạn có thể tự điều chỉnh
+        className.value = "Lớp đang sửa";
+
+        btnAdd.style.display = "none";
+        btnUpdate.style.display = "inline-block";
+        btnCancel.style.display = "inline-block";
+      });
+    });
+
+    // ======= Xử lý sự kiện Cập nhật =======
+    btnUpdate.onclick = function () {
+      if (validateForm()) {
+        showNotification("Chỉnh sửa thành công!");
+        fullName.value = "";
+        className.value = "";
+        btnAdd.style.display = "inline-block";
+        btnUpdate.style.display = "none";
+        btnCancel.style.display = "none";
+      }
+    };
+
+    // ======= Xử lý sự kiện Hủy =======
+    btnCancel.onclick = function () {
+      fullName.value = "";
+      className.value = "";
+      errorFullName.style.display = "none";
+      errorClassName.style.display = "none";
+      btnAdd.style.display = "inline-block";
+      btnUpdate.style.display = "none";
+      btnCancel.style.display = "none";
+    };
+
+    // ======= Xử lý sự kiện Xóa =======
+    document.querySelectorAll(".btn-delete").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        if (confirm("Bạn có chắc muốn xóa Học sinh này?")) {
+          showNotification("Xóa thành công!");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
